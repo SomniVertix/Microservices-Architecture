@@ -12,12 +12,13 @@
   "dependencies": {
     "@grpc/proto-loader": "^0.1.0",
     "async": "^1.5.2",
-    "consul": "^0.27.0",
+    "consul": "^0.34.1",
     "express": "^4.16.4",
     "google-protobuf": "^3.0.0",
     "grpc": "^1.11.0",
     "lodash": "^4.6.1",
     "minimist": "^1.2.0",
-    "npm": "^6.7.0"
+    "npm": "^6.7.0",
+    "uuid": "^3.0.0"
   }
 }
