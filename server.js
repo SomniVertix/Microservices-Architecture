@@ -14,38 +14,6 @@ var packageDefinition = protoLoader.loadSync(
 var basic_proto = grpc.loadPackageDefinition(packageDefinition).basic;
 //#endregion
 
-//#region Consul Config
-const consul = require('consul')({
-  "host": "127.0.0.1",
-  "port": 8500,
-  "secure": false
-});
-//#endregion
-
-//#region Express Config
-var express = require('express');
-var app = express();
-app.listen(8500, function (){
-  let details = {
-    name: 'www',
-    address: "127.0.0.1",
-    port: 8500,
-    id: "CONSUL_ID"
-  };
-  consul.agent.self(function (err, members) {
-    if (err) console.log(err);
-    console.log('members -- %j', members);
-  });
-
-  // consul.agent.service.register(details, (err, xyz) => {
-  //   if (err) {
-  //     throw err;
-  //   }
-  //   console.log('registered with Consul');
-  // });
-});
-//#endregion
-
 //#region API Functions
 function printData(call, callback) {
   console.info('Calling method [printData]');
