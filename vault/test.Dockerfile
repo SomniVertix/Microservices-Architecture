@@ -29,7 +29,13 @@ COPY ./config/vault-config.json /vault/config/vault-config.json
 EXPOSE 8200
 
 # pass in the script for vault auto config
-COPY ./entrypoint.sh /
-RUN chmod +x ./entrypoint.sh
+COPY ./config.sh /
+RUN chmod +x ./config.sh
 
-ENTRYPOINT ["vault"]
+COPY ./wait-for-it.sh /
+RUN chmod +x /wait-for-it.sh
+
+ADD ./entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
