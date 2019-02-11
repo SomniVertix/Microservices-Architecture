@@ -16,9 +16,6 @@
     "express": "^4.16.4",
     "google-protobuf": "^3.0.0",
     "grpc": "^1.11.0",
-    "lodash": "^4.6.1",
-    "minimist": "^1.2.0",
-    "npm": "^6.7.0",
-    "uuid": "^3.0.0"
+    "minimist": "^1.2.0"
   }
 }

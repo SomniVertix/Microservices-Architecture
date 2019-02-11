@@ -1,21 +1,65 @@
 version: '3'
-services: 
+services:
+  vault:
+    build:
+      context: ./vault
+      dockerfile: test.Dockerfile
+    ports:
+      - 8200:8200
+    volumes:
+      - ./vault/config:/vault/config
+      - ./vault/policies:/vault/policies
+      - ./vault/data:/vault/data
+      - ./vault/logs:/vault/logs
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200
+    command: server -config=/vault/config/vault-config.json
+    cap_add:
+      - IPC_LOCK
+    depends_on:
+      - consul
+    networks:
+    - mynetwork
+
+  consul:
+    build:
+      context: ./consul
+      dockerfile: test.dockerfile
+    ports:
+      - 8500:8500
+    command: agent -server -bind 0.0.0.0 -client 0.0.0.0 -bootstrap-expect 1 -config-file=/consul/config/config.json
+    volumes:
+      - ./consul/config/consul-config.json:/consul/config/config.json
+      - ./consul/data:/consul/data
+    networks:
+    - mynetwork
+
   app:
     image: node:alpine
     volumes:
       - ./:/app
     working_dir: /app
     depends_on:
-      - mongo
+      - db
     environment:
       NODE_ENV: development
     ports:
       - 3000:3000
     command: npm start
+    networks:
+    - mynetwork
 
-  mongo:
-      image: mongo
-      expose:
-        - 27017
-      volumes:
-        - ./data/db:/data/db
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=webmail
+      - MYSQL_USER=webmail
+      - MYSQL_PASSWORD=webmailpasswd
+    networks:
+    - mynetwork
+
+networks:
+  mynetwork:
