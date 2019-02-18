@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package serviceTwo;
+
+service ServiceTwo {
+  rpc GetData(DataRequest) returns (DataReply) {}
+}
+
+message DataRequest {
+  string name = 1;
+}
+
+message DataReply {
+  string message = 1;
+}
