@@ -31,8 +31,9 @@ function gServerConfig (){
     private_key: fs.readFileSync('../certs/server.key')
   }], true);
 
+  let address = process.env.consulhost + ":" + 8000
   server.bind(
-    `localhost:8000`, 
+    address, 
     credentials
     /*grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds */
     );
@@ -47,7 +48,7 @@ function gServerConfig (){
 
 //#region Consul Config
 const consul = require('consul')({
-  "host": "127.0.0.1",
+  "host": process.env.consulhost,
   "port": 8500, // whatever port consul is running on
   "secure": false
 });
@@ -59,8 +60,8 @@ var app = express();
 app.listen(8100, function (){
   let details = {
     name: 'GRPC Server One',
-    address: "localhost",
-    port: 8000, // whatever port consul is running on
+    address: process.env.serviceOne,
+    port: 8000,
     id: "S1"
   };
 

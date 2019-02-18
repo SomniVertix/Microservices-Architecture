@@ -24,11 +24,12 @@ ENV PATH="PATH=$PATH:$PWD/vault"
 
 # add the config file
 COPY ./config/vault-config.json /vault/config/vault-config.json
+COPY ./policies/app-policy.tf /vault/policies/app-policy.tf
 
 # expose port 8200
 EXPOSE 8200
 
-# pass in the script for vault auto config
+# pass in the scripts for vault auto config
 COPY ./config.sh /
 RUN chmod +x ./config.sh
 

@@ -1,0 +1,23 @@
+{
+  "name": "nodeapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm init && node ./ServiceOne/server1.js && node ./ServiceOne/client1.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@grpc/proto-loader": "^0.1.0",
+    "async": "^1.5.2",
+    "consul": "^0.34.1",
+    "express": "^4.16.4",
+    "google-protobuf": "^3.0.0",
+    "grpc": "^1.11.0",
+    "minimist": "^1.2.0",
+    "mysql": "^2.16.0",
+    "node-vault": "^0.9.5"
+  }
+}

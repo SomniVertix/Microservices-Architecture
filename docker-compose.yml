@@ -46,22 +46,41 @@ services:
     networks:
     - mynetwork
 
-  # app:
+  ServiceOne:
+    image: node:alpine
+    volumes:
+      - ./ServiceOne:/app
+    working_dir: /app
+    depends_on:
+      - db
+    environment:
+      NODE_ENV: development
+      dbhost: db
+      vaulthost: vault
+      consulhost: consul
+      serviceOne: ServiceOne
+      #serviceTwo: ServiceTwo
+    command: npm start
+    networks:
+    - mynetwork
+
+  # ServiceTwo:
   #   image: node:alpine
   #   volumes:
-  #     - ./:/app
+  #     - ./ServiceTwo:/app
   #   working_dir: /app
   #   depends_on:
   #     - db
   #   environment:
   #     NODE_ENV: development
   #     dbhost: db
-  #   ports:
-  #     - 3000:3000
+  #     vaulthost: vault
+  #     consulhost: consul
+  #     serviceOne: ServiceOne
+  #     serviceTwo: ServiceTwo
   #   command: npm start
   #   networks:
   #   - mynetwork
-
 
 
 networks:

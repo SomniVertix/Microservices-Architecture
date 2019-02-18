@@ -11,7 +11,7 @@ chmod +x ./unsealing.sh
 source ./unsealing.sh
 
 # Enable logs 
-vault audit enable file file_path=/vault/logs/audit.log
+#vault audit enable file file_path=/vault/logs/audit.log
 
 # Enable and Configure Database
 vault secrets enable database
@@ -36,9 +36,13 @@ vault read database/creds/app
 # Add vault keys to Consul k/v store 
 awk 'NR<=5{print "curl --request PUT --data \"" $0 "\" microservices-architecture_consul_1.microservices-architecture_mynetwork:8500/v1/kv/vault" NR-1 + 1}' init >> consulStoring.sh
 awk 'END {print "curl --request PUT --data \"" $0 "\" microservices-architecture_consul_1.microservices-architecture_mynetwork:8500/v1/kv/vaultLogin"}' init >> consulStoring.sh
+
+# Generate token for app to use and pass it to the container
+vault policy write app /vault/policies/app-policy.tf
+vault token create -policy=app > policy
+awk 'NR==3{print "curl --request PUT --data \"" $2 "\" microservices-architecture_consul_1.microservices-architecture_mynetwork:8500/v1/kv/appToken"}' policy >> consulStoring.sh
 chmod +x ./consulStoring.sh 
 source ./consulStoring.sh
 
-# Generate token for app to use and pass it to the container
-
 # Clean up
+# rm file init unsealing.sh consulStoring.sh config.sh

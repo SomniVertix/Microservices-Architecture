@@ -63,8 +63,8 @@ function ServiceTwoGRPCClient(address, port){
 
 //#region Consul Config
 const consul = require('consul')({
-  "host": "127.0.0.1",
-  "port": 8500,
+  "host": process.env.consulhost,
+  "port": 8500, // to be replaced with environment variable telling where consul is
   "secure": false
 });
 //#endregion
@@ -72,7 +72,7 @@ const consul = require('consul')({
 
 function retrieveVaultToken() {
   // Use consul to retrieve token from vault
-  consul.kv.get('vaultLogin', function (err, result) {
+  consul.kv.get('appToken', function (err, result) {
     if (err) throw (err);
     
     console.log("Vault Login Token: " + result.Value) 
@@ -88,18 +88,17 @@ function retrieveVaultToken() {
       console.log("Database User: " + res.data.username)
       console.log("Database User: " + res.data.password)
 
-      // console.log(process.env.dbhost)
-      // var mysql = require("mysql");
-      // var con = mysql.createConnection({
-      //   host: "192.168.16.3",
-      //   user: res.data.username,
-      //   password: res.data.password
-      // });
+      var mysql = require("mysql");
+      var con = mysql.createConnection({
+        host: process.env.dbhost,
+        user: res.data.username,
+        password: res.data.password
+      });
 
-      // con.connect(function(err) {
-      //   if (err) throw err;
-      //   console.log("Connected!");
-      // });
+      con.connect(function(err) {
+        if (err) throw err;
+        console.log("Connected!");
+      });
     })
     .catch(console.error);
 
@@ -110,20 +109,7 @@ function retrieveVaultToken() {
 
 
 function main() {  
-  // const serviceOneClient = ServiceOneGRPCClient();
-  // dataRequestObject = {name: 'Eric'};
-
-  // serviceOneClient.printData(dataRequestObject, function(err, response) {
-  //   console.log("RESPONSE:", response.message);
-  // });
-  
-  // const serviceTwoClient = ServiceTwoGRPCClient();
-  // dataRequestObject = {name: 'Eric'};
-
-  // serviceTwoClient.GetData(dataRequestObject, function(err, response) {
-  //   console.log("RESPONSE:", response.message);
-  // });
-
+  retrieveVaultToken();
   consul.catalog.service.nodes('GRPC Server One', function(err, result) {
     if (err) throw err;
     const serviceOneClient = ServiceOneGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
@@ -133,14 +119,14 @@ function main() {
     });
   });
 
-  consul.catalog.service.nodes('GRPC Server Two', function(err, result) {
-    if (err) throw err;
-    const serviceTwoClient = ServiceTwoGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
-    dataRequestObject = {name: 'Eric'}
-    serviceTwoClient.GetData(dataRequestObject, function(err, response) {
-      console.log("RESPONSE:", response.message);
-    });
-  });
+  // consul.catalog.service.nodes('GRPC Server Two', function(err, result) {
+  //   if (err) throw err;
+  //   const serviceTwoClient = ServiceTwoGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
+  //   dataRequestObject = {name: 'Eric'}
+  //   serviceTwoClient.GetData(dataRequestObject, function(err, response) {
+  //     console.log("RESPONSE:", response.message);
+  //   });
+  // });
 
 }
 

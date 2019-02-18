@@ -1,1 +1,0 @@
-{"Token":"","Service":{"ID":"S1","Service":"GRPC Server One","Tags":null,"Address":"localhost","Meta":null,"Port":8000,"EnableTagOverride":false,"ProxyDestination":"","Connect":{"Native":false,"Proxy":null},"CreateIndex":0,"ModifyIndex":0}}
