@@ -34,7 +34,11 @@ vault write database/roles/app \
 vault read database/creds/app
 
 # Add vault keys to Consul k/v store 
-awk 'NR<=5{print "vault kv put secret/vaultKeys vaultKey" NR-1 + 1 "=" $0 }' init >> consulStoring.sh
-awk 'END {print "vault kv put secret/vaultKeys vaultLogin=" $0 }' init >> consulStoring.sh
+awk 'NR<=5{print "curl --request PUT --data \"" $0 "\" microservices-architecture_consul_1.microservices-architecture_mynetwork:8500/v1/kv/vault" NR-1 + 1}' init >> consulStoring.sh
+awk 'END {print "curl --request PUT --data \"" $0 "\" microservices-architecture_consul_1.microservices-architecture_mynetwork:8500/v1/kv/vaultLogin"}' init >> consulStoring.sh
 chmod +x ./consulStoring.sh 
 source ./consulStoring.sh
+
+# Generate token for app to use and pass it to the container
+
+# Clean up

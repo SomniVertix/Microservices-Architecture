@@ -38,4 +38,6 @@ RUN chmod +x /wait-for-it.sh
 ADD ./entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
+RUN apk add curl
+
 ENTRYPOINT ["./entrypoint.sh"]

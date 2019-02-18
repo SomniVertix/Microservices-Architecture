@@ -1,7 +1,5 @@
 version: '3'
 services:
-  
-    
   vault:
     build:
       context: ./vault
@@ -47,6 +45,7 @@ services:
       - MYSQL_PASSWORD=webmailpasswd
     networks:
     - mynetwork
+
   # app:
   #   image: node:alpine
   #   volumes:
@@ -56,6 +55,7 @@ services:
   #     - db
   #   environment:
   #     NODE_ENV: development
+  #     dbhost: db
   #   ports:
   #     - 3000:3000
   #   command: npm start
