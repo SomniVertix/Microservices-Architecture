@@ -16,7 +16,7 @@ var service_two_proto = grpc.loadPackageDefinition(second_packageDefinition).ser
 // API Functions
 function GetData (call, callback){
   console.log("Revieved request from:", call.request.name);
-  callback(null, {message: "I am a response from Server One"} /* DataReply Object */);
+  callback(null, {message: "I am a response from Server Two"} /* DataReply Object */);
 }
 
 // Server config options
@@ -32,9 +32,9 @@ function ServiceTwoGRPCServer (){
   }], true);
 
   server.bind(
-    `localhost:8550`, // Get this from Consul
+    `localhost:9000`, // Get this from Consul
     credentials
-    /* grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds */
+    //grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds 
     );
   server.start();
   return server;
@@ -43,38 +43,34 @@ function ServiceTwoGRPCServer (){
 
 //#endregion
 
-//#region ETC
+
 //#region Consul Config
-// const consul = require('consul')({
-//   "host": "127.0.0.1",
-//   "port": 8600,
-//   "secure": false
-// });
+const consul = require('consul')({
+  "host": "127.0.0.1",
+  "port": 8500,
+  "secure": false
+});
 //#endregion
+
 
 //#region Express Config
 var express = require('express');
 var app = express();
-app.listen(8600, function (){
-  // let details = {
-  //   name: 'www',
-  //   address: "127.0.0.1",
-  //   port: 8600,
-  //   id: "CONSUL_ID"
-  // };
-  // consul.agent.self(function (err, members) {
-  //   if (err) console.log(err);
-  //   console.log('members -- %j', members);
-  // });
+app.listen(9100, function (){
+  let details = {
+    name: 'GRPC Server Two',
+    address: "localhost",
+    port: 9000,
+    id: "S2"
+  };
 
-  // consul.agent.service.register(details, (err, xyz) => {
-  //   if (err) {
-  //     throw err;
-  //   }
-  //   console.log('registered with Consul');
-  // });
+  consul.agent.service.register(details, (err, xyz) => {
+    if (err) {
+      throw err;
+    }
+    console.log(details.name, 'registered with Consul');
+  });
 });
-//#endregion
 //#endregion
 
 function main() {

@@ -32,9 +32,9 @@ function gServerConfig (){
   }], true);
 
   server.bind(
-    `localhost:8500`, 
+    `localhost:8000`, 
     credentials
-    /* grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds */
+    /*grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds */
     );
   server.start();
   return server;
@@ -42,38 +42,35 @@ function gServerConfig (){
 
 //#endregion
 
-//#region ETC
+
+
+
 //#region Consul Config
-// const consul = require('consul')({
-//   "host": "127.0.0.1",
-//   "port": 8600,
-//   "secure": false
-// });
+const consul = require('consul')({
+  "host": "127.0.0.1",
+  "port": 8500, // whatever port consul is running on
+  "secure": false
+});
 //#endregion
 
 //#region Express Config
 var express = require('express');
 var app = express();
-app.listen(8600, function (){
-  // let details = {
-  //   name: 'www',
-  //   address: "127.0.0.1",
-  //   port: 8600,
-  //   id: "CONSUL_ID"
-  // };
-  // consul.agent.self(function (err, members) {
-  //   if (err) console.log(err);
-  //   console.log('members -- %j', members);
-  // });
+app.listen(8100, function (){
+  let details = {
+    name: 'GRPC Server One',
+    address: "localhost",
+    port: 8000, // whatever port consul is running on
+    id: "S1"
+  };
 
-  // consul.agent.service.register(details, (err, xyz) => {
-  //   if (err) {
-  //     throw err;
-  //   }
-  //   console.log('registered with Consul');
-  // });
+  consul.agent.service.register(details, (err, xyz) => {
+    if (err) {
+      throw err;
+    }
+    console.log(details.name, 'registered with Consul');
+  });
 });
-//#endregion
 //#endregion
 
 
