@@ -35,10 +35,19 @@ function ServiceOneGRPCClient(address, port){
     fs.readFileSync('../certs/client.crt')
   );
   
+
+  // Fix for using localhost generated keys in non-localhost applications
+  // As seen here -> https://github.com/grpc/grpc/issues/6722
+  var options = {
+    'grpc.ssl_target_name_override' : "localhost",
+    'grpc.default_authority': "localhost"
+  };
+  
   var fullAddress = address + ":" + port
   var client = new service_one_proto.ServiceOne(
     fullAddress, 
-    credentials
+    credentials,
+    options
     //grpc.credentials.createInsecure() // In case you wanted to try it without creds
   );
   return client;
@@ -50,6 +59,12 @@ function ServiceTwoGRPCClient(address, port){
     fs.readFileSync('../certs/client.key'), 
     fs.readFileSync('../certs/client.crt')
   );
+
+  var options = {
+    'grpc.ssl_target_name_override' : "localhost",
+    'grpc.default_authority': "localhost"
+  };
+
   var fullAddress = "https://" + address + ":" + port
   var client = new service_two_proto.ServiceTwo(
     fullAddress,
@@ -69,7 +84,6 @@ const consul = require('consul')({
 });
 //#endregion
 
-// working
 function retrieveVaultToken() {
   // Use consul to retrieve token from vault
   consul.kv.get('appToken', function (err, result) {
@@ -110,25 +124,27 @@ function retrieveVaultToken() {
 
 
 function main() {  
-  //retrieveVaultToken();
+  
   consul.catalog.service.nodes('GRPC Server One', function(err, result) {
    if (err) throw err;
+
    const serviceOneClient = ServiceOneGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
    dataRequestObject = {name: 'Bryan'}
    serviceOneClient.printData(dataRequestObject, function(err, response) {
-     console.log("RESPONSE:", response.message);
+     console.log("RESPONSE:", response);
    });
   });
 
-  // consul.catalog.service.nodes('GRPC Server Two', function(err, result) {
-  //   if (err) throw err;
-  //   const serviceTwoClient = ServiceTwoGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
-  //   dataRequestObject = {name: 'Eric'}
-  //   serviceTwoClient.GetData(dataRequestObject, function(err, response) {
-  //     console.log("RESPONSE:", response.message);
-  //   });
-  // });
+  consul.catalog.service.nodes('GRPC Server Two', function(err, result) {
+    if (err) throw err;
+    const serviceTwoClient = ServiceTwoGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
+    dataRequestObject = {name: 'Eric'}
+    serviceTwoClient.GetData(dataRequestObject, function(err, response) {
+      console.log("RESPONSE:", response.message);
+    });
+  });
 
+  retrieveVaultToken();
 }
 
 main();

@@ -31,8 +31,9 @@ function ServiceTwoGRPCServer (){
     private_key: fs.readFileSync('../certs/server.key')
   }], true);
 
+  let address = process.env.serviceOne + ":" + 8000
   server.bind(
-    `localhost:9000`, // Get this from Consul
+    address, 
     credentials
     //grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds 
     );
@@ -46,7 +47,7 @@ function ServiceTwoGRPCServer (){
 
 //#region Consul Config
 const consul = require('consul')({
-  "host": "127.0.0.1",
+  "host": process.env.consulhost,
   "port": 8500,
   "secure": false
 });
@@ -59,7 +60,7 @@ var app = express();
 app.listen(9100, function (){
   let details = {
     name: 'GRPC Server Two',
-    address: "localhost",
+    address: process.env.serviceOne,
     port: 9000,
     id: "S2"
   };

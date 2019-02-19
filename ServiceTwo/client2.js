@@ -35,11 +35,18 @@ function ServiceOneGRPCClient(address, port){
     fs.readFileSync('../certs/client.crt')
   );
   
+  // Fix for using localhost generated keys in non-localhost applications
+  // As seen here -> https://github.com/grpc/grpc/issues/6722
+  var options = {
+    'grpc.ssl_target_name_override' : "localhost",
+    'grpc.default_authority': "localhost"
+  };
+  
   var fullAddress = address + ":" + port
   var client = new service_one_proto.ServiceOne(
     fullAddress, 
     credentials
-    /*grpc.credentials.createInsecure() // In case you wanted to try it without creds */
+    // grpc.credentials.createInsecure() // In case you wanted to try it without creds
   );
   return client;
 }
@@ -50,11 +57,17 @@ function ServiceTwoGRPCClient(address, port){
     fs.readFileSync('../certs/client.key'), 
     fs.readFileSync('../certs/client.crt')
   );
+  
+  var options = {
+    'grpc.ssl_target_name_override' : "localhost",
+    'grpc.default_authority': "localhost"
+  };
+  
   var fullAddress = address + ":" + port
   var client = new service_two_proto.ServiceTwo(
     fullAddress, // Replace this with consul
     credentials
-    //grpc.credentials.createInsecure() // In case you wanted to try it without creds
+    // grpc.credentials.createInsecure() // In case you wanted to try it without creds
   );
   return client;
 }
@@ -62,7 +75,7 @@ function ServiceTwoGRPCClient(address, port){
 
 //#region Consul Config
 const consul = require('consul')({
-  "host": "127.0.0.1",
+  "host": process.env.consulhost,
   "port": 8500,
   "secure": false
 });

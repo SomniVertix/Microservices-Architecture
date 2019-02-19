@@ -20,7 +20,7 @@ function printData(call, callback) {
 }
 
 // Server config options
-function gServerConfig (){
+function ServiceOneGRPCServer (){
   var server = new grpc.Server();
 
   server.addService(service_one_proto.ServiceOne.service, {printData: printData});
@@ -44,8 +44,6 @@ function gServerConfig (){
 //#endregion
 
 
-
-
 //#region Consul Config
 const consul = require('consul')({
   "host": process.env.consulhost,
@@ -53,6 +51,7 @@ const consul = require('consul')({
   "secure": false
 });
 //#endregion
+
 
 //#region Express Config
 var express = require('express');
@@ -66,20 +65,14 @@ app.listen(8100, function (){
   };
 
   consul.agent.service.register(details, (err, xyz) => {
-    if (err) {
-      throw err;
-    }
+    if (err) throw err;
     console.log(details.name, 'registered with Consul');
   });
 });
 //#endregion
 
-
-
-
-
 function main() {
-  const server = gServerConfig();
+  const server = ServiceOneGRPCServer();
 
   console.log('Server 1 Running . . . ');
 }
