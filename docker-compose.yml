@@ -50,6 +50,8 @@ services:
     image: node:alpine
     volumes:
       - ./ServiceOne:/app
+      - ./proto:/proto
+      - ./certs:/certs
     working_dir: /app
     depends_on:
       - db

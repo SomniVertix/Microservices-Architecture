@@ -31,11 +31,11 @@ function gServerConfig (){
     private_key: fs.readFileSync('../certs/server.key')
   }], true);
 
-  let address = process.env.consulhost + ":" + 8000
+  let address = process.env.serviceOne + ":" + 8000
   server.bind(
     address, 
     credentials
-    /*grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds */
+    // grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds
     );
   server.start();
   return server;

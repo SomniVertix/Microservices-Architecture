@@ -1,11 +1,10 @@
 {
   "name": "nodeapp",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm init && node ./ServiceOne/server1.js && node ./ServiceOne/client1.js"
+    "start": "npm install && node ./server1.js && node ./client1.js"
   },
   "author": "",
   "license": "ISC",
@@ -19,5 +18,7 @@
     "minimist": "^1.2.0",
     "mysql": "^2.16.0",
     "node-vault": "^0.9.5"
-  }
+  },
+  "devDependencies": {},
+  "description": ""
 }

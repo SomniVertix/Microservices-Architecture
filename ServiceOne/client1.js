@@ -39,7 +39,7 @@ function ServiceOneGRPCClient(address, port){
   var client = new service_one_proto.ServiceOne(
     fullAddress, 
     credentials
-    /*grpc.credentials.createInsecure() // In case you wanted to try it without creds */
+    //grpc.credentials.createInsecure() // In case you wanted to try it without creds
   );
   return client;
 }
@@ -50,11 +50,11 @@ function ServiceTwoGRPCClient(address, port){
     fs.readFileSync('../certs/client.key'), 
     fs.readFileSync('../certs/client.crt')
   );
-  var fullAddress = address + ":" + port
+  var fullAddress = "https://" + address + ":" + port
   var client = new service_two_proto.ServiceTwo(
-    fullAddress, // Replace this with consul
-    credentials
-    //grpc.credentials.createInsecure() // In case you wanted to try it without creds
+    fullAddress,
+    // credentials
+    grpc.credentials.createInsecure() // In case you wanted to try it without creds
   );
   return client;
 }
@@ -69,24 +69,25 @@ const consul = require('consul')({
 });
 //#endregion
 
-
+// working
 function retrieveVaultToken() {
   // Use consul to retrieve token from vault
   consul.kv.get('appToken', function (err, result) {
     if (err) throw (err);
-    
-    console.log("Vault Login Token: " + result.Value) 
+    // console.log(process.env.consulhost);
+    // console.log("Vault Login Token: " + result.Value) 
 
     // use vault token to connect to vault and get database creds
+    let endpoint = "http://" +process.env.vaulthost + ":" + 8200;
     var options = {
+      endpoint: endpoint,
       token: result.Value
     }
   
     var vault = require("node-vault")(options);
     vault.read("database/creds/app").then( (res) => {
-      console.log(res)
-      console.log("Database User: " + res.data.username)
-      console.log("Database User: " + res.data.password)
+      // console.log("Database User: " + res.data.username)
+      // console.log("Database User: " + res.data.password)
 
       var mysql = require("mysql");
       var con = mysql.createConnection({
@@ -109,14 +110,14 @@ function retrieveVaultToken() {
 
 
 function main() {  
-  retrieveVaultToken();
+  //retrieveVaultToken();
   consul.catalog.service.nodes('GRPC Server One', function(err, result) {
-    if (err) throw err;
-    const serviceOneClient = ServiceOneGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
-    dataRequestObject = {name: 'Bryan'}
-    serviceOneClient.printData(dataRequestObject, function(err, response) {
-      console.log("RESPONSE:", response.message);
-    });
+   if (err) throw err;
+   const serviceOneClient = ServiceOneGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
+   dataRequestObject = {name: 'Bryan'}
+   serviceOneClient.printData(dataRequestObject, function(err, response) {
+     console.log("RESPONSE:", response.message);
+   });
   });
 
   // consul.catalog.service.nodes('GRPC Server Two', function(err, result) {
@@ -131,11 +132,3 @@ function main() {
 }
 
 main();
-
-
-// Useful Links
-/**
- * https://github.com/grpc/grpc/issues/9210
- * https://github.com/grpc/grpc/issues/9210
- * 
- */
