@@ -44,5 +44,6 @@ awk 'NR==3{print "curl --request PUT --data \"" $2 "\" microservices-architectur
 chmod +x ./consulStoring.sh 
 source ./consulStoring.sh
 
-# Clean up
-# rm file init unsealing.sh consulStoring.sh config.sh
+# Clean up for security
+rm file init unsealing.sh consulStoring.sh config.sh
+history -c 

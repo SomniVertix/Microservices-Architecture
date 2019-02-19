@@ -1,3 +1,5 @@
+const CONSUL_HOST = process.env.consulhost
+
 //#region gRPC Config
 var PROTO_PATH = '../proto/ServiceOne.proto';
 var grpc = require('grpc');
@@ -15,7 +17,7 @@ var service_one_proto = grpc.loadPackageDefinition(packageDefinition).serviceOne
 
 // API Functions
 function printData(call, callback) {
-  console.log("Revieved request from:", call.request.name);
+  console.log("Request from:", call.request.name);
   callback(null, {message: "I am a response from Server One"} /* DataReply Object */);
 }
 
@@ -46,7 +48,7 @@ function ServiceOneGRPCServer (){
 
 //#region Consul Config
 const consul = require('consul')({
-  "host": process.env.consulhost,
+  "host": CONSUL_HOST,
   "port": 8500, // whatever port consul is running on
   "secure": false
 });

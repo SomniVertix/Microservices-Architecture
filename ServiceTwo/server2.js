@@ -1,3 +1,5 @@
+const CONSUL_HOST = process.env.consulhost
+
 //#region gRPC Config
 var SECOND_PROTO_PATH = '../proto/ServiceTwo.proto';
 var grpc = require('grpc');
@@ -15,8 +17,8 @@ var service_two_proto = grpc.loadPackageDefinition(second_packageDefinition).ser
 
 // API Functions
 function GetData (call, callback){
-  console.log("Revieved request from:", call.request.name);
-  callback(null, {message: "I am a response from Server Two"} /* DataReply Object */);
+  console.log("Request from:", call.request.name);
+  callback(null, {message: "I am a response from Server Two"} );
 }
 
 // Server config options
@@ -31,23 +33,22 @@ function ServiceTwoGRPCServer (){
     private_key: fs.readFileSync('../certs/server.key')
   }], true);
 
-  let address = process.env.serviceOne + ":" + 8000
+  let address = process.env.serviceTwo + ":" + 9000
   server.bind(
     address, 
     credentials
-    //grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds 
+    // grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds 
     );
   server.start();
   return server;
 }
-
 
 //#endregion
 
 
 //#region Consul Config
 const consul = require('consul')({
-  "host": process.env.consulhost,
+  "host": CONSUL_HOST,
   "port": 8500,
   "secure": false
 });
@@ -60,15 +61,13 @@ var app = express();
 app.listen(9100, function (){
   let details = {
     name: 'GRPC Server Two',
-    address: process.env.serviceOne,
+    address: process.env.serviceTwo,
     port: 9000,
     id: "S2"
   };
 
   consul.agent.service.register(details, (err, xyz) => {
-    if (err) {
-      throw err;
-    }
+    if (err) throw err;
     console.log(details.name, 'registered with Consul');
   });
 });

@@ -1,3 +1,7 @@
+const CONSUL_HOST = process.env.consulhost
+const VAULT_HOST = process.env.vaulthost
+const DB_HOST = process.env.dbhost
+
 //#region gRPC Config
 
 // Service one and two's proto definitions
@@ -35,7 +39,6 @@ function ServiceOneGRPCClient(address, port){
     fs.readFileSync('../certs/client.crt')
   );
   
-
   // Fix for using localhost generated keys in non-localhost applications
   // As seen here -> https://github.com/grpc/grpc/issues/6722
   var options = {
@@ -65,20 +68,20 @@ function ServiceTwoGRPCClient(address, port){
     'grpc.default_authority': "localhost"
   };
 
-  var fullAddress = "https://" + address + ":" + port
+  var fullAddress = address + ":" + port
   var client = new service_two_proto.ServiceTwo(
     fullAddress,
-    // credentials
-    grpc.credentials.createInsecure() // In case you wanted to try it without creds
+    credentials,
+    options
+    // grpc.credentials.createInsecure() // In case you wanted to try it without creds
   );
   return client;
 }
 //#endregion
 
-
 //#region Consul Config
 const consul = require('consul')({
-  "host": process.env.consulhost,
+  "host": CONSUL_HOST,
   "port": 8500, // to be replaced with environment variable telling where consul is
   "secure": false
 });
@@ -92,7 +95,7 @@ function retrieveVaultToken() {
     // console.log("Vault Login Token: " + result.Value) 
 
     // use vault token to connect to vault and get database creds
-    let endpoint = "http://" +process.env.vaulthost + ":" + 8200;
+    let endpoint = "http://" + VAULT_HOST + ":" + 8200;
     var options = {
       endpoint: endpoint,
       token: result.Value
@@ -105,7 +108,7 @@ function retrieveVaultToken() {
 
       var mysql = require("mysql");
       var con = mysql.createConnection({
-        host: process.env.dbhost,
+        host: DB_HOST,
         user: res.data.username,
         password: res.data.password
       });
@@ -121,30 +124,53 @@ function retrieveVaultToken() {
   })
 }
 
+function waitForServer(serverName){
+  consul.catalog.service.nodes(serverName, function(err, result) {
+    if (err) throw err;
+    if (result != "undefined"){
+      return false;
+    }
+  });
+  return true;
+}
+
+function msleep(n) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, n);
+}
+
+function main() { 
+  let serverOneName = 'GRPC Server One'
+  let serverTwoName = 'GRPC Server Two' 
+  let dataRequestObject = {name: 'Service 1 Client'}
 
 
-function main() {  
-  
-  consul.catalog.service.nodes('GRPC Server One', function(err, result) {
+  // Server One Pings
+  if (waitForServer(serverOneName)){
+    msleep(5000);
+  }
+  consul.catalog.service.nodes(serverOneName, function(err, result) {
    if (err) throw err;
-
    const serviceOneClient = ServiceOneGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
-   dataRequestObject = {name: 'Bryan'}
    serviceOneClient.printData(dataRequestObject, function(err, response) {
-     console.log("RESPONSE:", response);
+     console.log("RESPONSE:", response.message);
    });
   });
 
-  consul.catalog.service.nodes('GRPC Server Two', function(err, result) {
+
+  // Server Two Pings
+  if (waitForServer(serverTwoName)){
+    msleep(5000);
+  }
+  consul.catalog.service.nodes(serverTwoName, function(err, result) {
     if (err) throw err;
-    const serviceTwoClient = ServiceTwoGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
-    dataRequestObject = {name: 'Eric'}
+    console.log(result[0].ServiceAddress,result[0].ServicePort)
+    const serviceTwoClient = ServiceTwoGRPCClient(result[0].ServiceAddress, result[0].ServicePort );
     serviceTwoClient.GetData(dataRequestObject, function(err, response) {
       console.log("RESPONSE:", response.message);
     });
   });
 
-  retrieveVaultToken();
+  //retrieveVaultToken();
 }
 
 main();

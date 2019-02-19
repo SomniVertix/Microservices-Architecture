@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm install && node ./server1.js && node ./client1.js"
+    "start": "npm install && concurrently \"node ./server1.js \" \"node ./client1.js\""
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +17,7 @@
     "grpc": "^1.11.0",
     "minimist": "^1.2.0",
     "mysql": "^2.16.0",
+    "concurrently": "3.5.1",
     "node-vault": "^0.9.5"
   },
   "devDependencies": {},

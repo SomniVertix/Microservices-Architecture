@@ -1,3 +1,7 @@
+const CONSUL_HOST = process.env.consulhost
+const VAULT_HOST = process.env.vaulthost
+const DB_HOST = process.env.dbhost
+
 //#region gRPC Config
 
 // Service one and two's proto definitions
@@ -45,7 +49,8 @@ function ServiceOneGRPCClient(address, port){
   var fullAddress = address + ":" + port
   var client = new service_one_proto.ServiceOne(
     fullAddress, 
-    credentials
+    credentials,
+    options
     // grpc.credentials.createInsecure() // In case you wanted to try it without creds
   );
   return client;
@@ -65,8 +70,9 @@ function ServiceTwoGRPCClient(address, port){
   
   var fullAddress = address + ":" + port
   var client = new service_two_proto.ServiceTwo(
-    fullAddress, // Replace this with consul
-    credentials
+    fullAddress,
+    credentials,
+    options
     // grpc.credentials.createInsecure() // In case you wanted to try it without creds
   );
   return client;
@@ -75,33 +81,58 @@ function ServiceTwoGRPCClient(address, port){
 
 //#region Consul Config
 const consul = require('consul')({
-  "host": process.env.consulhost,
+  "host": CONSUL_HOST,
   "port": 8500,
   "secure": false
 });
 //#endregion
 
 
-function main() {
-  
-  consul.catalog.service.nodes('GRPC Server One', function(err, result) {
+function waitForServer(serverName){
+  consul.catalog.service.nodes(serverName, function(err, result) {
     if (err) throw err;
-    const serviceOneClient = ServiceOneGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
-    dataRequestObject = {name: 'Bryan'}
-    serviceOneClient.printData(dataRequestObject, function(err, response) {
-      console.log("RESPONSE:", response.message);
-    });
+    if (result != "undefined"){
+      return false;
+    }
+  });
+  return true;
+}
+
+function msleep(n) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, n);
+}
+
+function main() {
+  let serverOneName = 'GRPC Server One'
+  let serverTwoName = 'GRPC Server Two' 
+  let dataRequestObject = {name: 'Service 2 Client'} 
+
+
+
+  // Server One Pings
+  if (waitForServer(serverOneName)){
+    msleep(5000);
+  }
+  consul.catalog.service.nodes(serverOneName, function(err, result) {
+   if (err) throw err;
+   const serviceOneClient = ServiceOneGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
+   serviceOneClient.printData(dataRequestObject, function(err, response) {
+     console.log("RESPONSE:", response.message);
+   });
   });
 
-  consul.catalog.service.nodes('GRPC Server Two', function(err, result) {
+
+  // Server Two Pings
+  if (waitForServer(serverTwoName)){
+    msleep(5000);
+  }
+  consul.catalog.service.nodes(serverTwoName, function(err, result) {
     if (err) throw err;
     const serviceTwoClient = ServiceTwoGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
-    dataRequestObject = {name: 'Eric'}
     serviceTwoClient.GetData(dataRequestObject, function(err, response) {
       console.log("RESPONSE:", response.message);
     });
   });
-  
 }
 
 main();
