@@ -18,5 +18,5 @@ These aspects are the bread & butter of this project (consul was used for servic
 
 
 ### Credits
-wait-for-it.sh - Used when waiting for the database. Great tool!
+wait-for-it.sh - Used when waiting for the database. Great tool!  
 https://github.com/testdrivenio/vault-consul-docker - Directory structure and organization inspired by this. Also a great starter into vault and consul!
