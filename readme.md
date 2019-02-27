@@ -15,3 +15,8 @@ These aspects are the bread & butter of this project (consul was used for servic
 * Initializing clients for both ServiceOne and ServiceTwo
 * Both clients requesting information (``response.message``) from each of the servers
 * Both servers logging when it recieves requests from each of the clients
+
+
+### Credits
+wait-for-it.sh - Used when waiting for the database. Great tool!  
+https://github.com/testdrivenio/vault-consul-docker - Directory structure and organization inspired by this. Also a great starter into vault and consul!
