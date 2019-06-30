@@ -1,3 +1,20 @@
+/*
+ * Copyright 2019 gRPC authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 declare module "grpc" {
   import { Message, Service as ProtobufService } from "protobufjs";
   import { Duplex, Readable, Writable } from "stream";
@@ -946,18 +963,6 @@ declare module "grpc" {
      * instance.
      */
     compose(callCredentials: CallCredentials): ChannelCredentials;
-
-    /**
-     * Gets the set of per-call credentials associated with this instance.
-     */
-    getCallCredentials(): CallCredentials;
-
-    /**
-     * Gets a SecureContext object generated from input parameters if this
-     * instance was created with createSsl, or null if this instance was created
-     * with createInsecure.
-     */
-    getSecureContext(): SecureContext | null;
   }
 
   /**
@@ -1528,7 +1533,7 @@ declare module "grpc" {
     TRANSIENT_FAILURE = 3,
     SHUTDOWN = 4
   }
-  
+
   export class Channel {
     /**
      * This constructor API is almost identical to the Client constructor,
@@ -1566,8 +1571,8 @@ declare module "grpc" {
     watchConnectivityState(currentState: connectivityState, deadline: Date|number, callback: (error?: Error) => void): void;
     /**
      * Create a call object. Call is an opaque type that is used by the Client
-     * and Server classes. This function is called by the gRPC library when 
-     * starting a request. Implementers should return an instance of Call that 
+     * and Server classes. This function is called by the gRPC library when
+     * starting a request. Implementers should return an instance of Call that
      * is returned from calling createCall on an instance of the provided
      * Channel class.
      * @param method The full method string to request.
@@ -1578,5 +1583,5 @@ declare module "grpc" {
      *     that indicates what information to propagate from parentCall.
      */
     createCall(method: string, deadline: Date|number, host: string|null, parentCall: Call|null, propagateFlags: number|null): Call;
-  }  
+  }
 }

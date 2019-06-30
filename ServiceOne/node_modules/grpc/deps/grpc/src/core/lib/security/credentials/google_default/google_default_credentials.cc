@@ -46,7 +46,7 @@
 
 /* -- Constants. -- */
 
-#define GRPC_COMPUTE_ENGINE_DETECTION_HOST "metadata.google.internal"
+#define GRPC_COMPUTE_ENGINE_DETECTION_HOST "metadata.google.internal."
 
 /* -- Default credentials. -- */
 
@@ -114,6 +114,19 @@ grpc_google_default_channel_credentials::create_security_connector(
   return sc;
 }
 
+grpc_channel_args* grpc_google_default_channel_credentials::update_arguments(
+    grpc_channel_args* args) {
+  grpc_channel_args* updated = args;
+  if (grpc_channel_args_find(args, GRPC_ARG_DNS_ENABLE_SRV_QUERIES) ==
+      nullptr) {
+    grpc_arg new_srv_arg = grpc_channel_arg_integer_create(
+        const_cast<char*>(GRPC_ARG_DNS_ENABLE_SRV_QUERIES), true);
+    updated = grpc_channel_args_copy_and_add(args, &new_srv_arg, 1);
+    grpc_channel_args_destroy(args);
+  }
+  return updated;
+}
+
 static void on_metadata_server_detection_http_response(void* user_data,
                                                        grpc_error* error) {
   metadata_server_detector* detector =
@@ -159,7 +172,6 @@ static int is_metadata_server_reachable() {
   detector.pollent = grpc_polling_entity_create_from_pollset(pollset);
   detector.is_done = 0;
   detector.success = 0;
-  memset(&detector.response, 0, sizeof(detector.response));
   memset(&request, 0, sizeof(grpc_httpcli_request));
   request.host = (char*)GRPC_COMPUTE_ENGINE_DETECTION_HOST;
   request.http.path = (char*)"/";
@@ -259,7 +271,7 @@ end:
   GPR_ASSERT((result == nullptr) + (error == GRPC_ERROR_NONE) == 1);
   if (creds_path != nullptr) gpr_free(creds_path);
   grpc_slice_unref_internal(creds_data);
-  if (json != nullptr) grpc_json_destroy(json);
+  grpc_json_destroy(json);
   *creds = result;
   return error;
 }

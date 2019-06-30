@@ -74,7 +74,7 @@ struct call_data {
 
   ~call_data() { GRPC_ERROR_UNREF(recv_initial_metadata_error); }
 
-  grpc_call_combiner* call_combiner;
+  grpc_core::CallCombiner* call_combiner;
   grpc_call_stack* owning_call;
   grpc_transport_stream_op_batch* recv_initial_metadata_batch;
   grpc_closure* original_recv_initial_metadata_ready;
@@ -169,6 +169,7 @@ static void on_md_processing_done(
     grpc_status_code status, const char* error_details) {
   grpc_call_element* elem = static_cast<grpc_call_element*>(user_data);
   call_data* calld = static_cast<call_data*>(elem->call_data);
+  grpc_core::ApplicationCallbackExecCtx callback_exec_ctx;
   grpc_core::ExecCtx exec_ctx;
   // If the call was not cancelled while we were in flight, process the result.
   if (gpr_atm_full_cas(&calld->state, static_cast<gpr_atm>(STATE_INIT),
@@ -218,8 +219,7 @@ static void recv_initial_metadata_ready(void* arg, grpc_error* error) {
       // to drop the call combiner early if we get cancelled.
       GRPC_CLOSURE_INIT(&calld->cancel_closure, cancel_call, elem,
                         grpc_schedule_on_exec_ctx);
-      grpc_call_combiner_set_notify_on_cancel(calld->call_combiner,
-                                              &calld->cancel_closure);
+      calld->call_combiner->SetNotifyOnCancel(&calld->cancel_closure);
       GRPC_CALL_STACK_REF(calld->owning_call, "server_auth_metadata");
       calld->md = metadata_batch_to_md_array(
           batch->payload->recv_initial_metadata.recv_initial_metadata);

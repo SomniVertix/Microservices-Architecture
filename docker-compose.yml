@@ -18,6 +18,8 @@ services:
     depends_on:
       - consul
       - db
+    logging:
+      driver: "none"
     networks:
     - mynetwork
 
@@ -31,6 +33,8 @@ services:
     volumes:
       - ./consul/config/consul-config.json:/consul/config/config.json
       - ./consul/data:/consul/data
+    logging:
+      driver: "none"
     networks:
     - mynetwork
 
@@ -43,6 +47,8 @@ services:
       - MYSQL_DATABASE=webmail
       - MYSQL_USER=webmail
       - MYSQL_PASSWORD=webmailpasswd
+    logging:
+      driver: "none"
     networks:
     - mynetwork
 
@@ -61,7 +67,6 @@ services:
       vaulthost: vault
       consulhost: consul
       serviceOne: ServiceOne
-      serviceTwo: ServiceTwo
     command: npm start
     networks:
     - mynetwork

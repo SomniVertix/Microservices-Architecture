@@ -18,7 +18,7 @@ var service_one_proto = grpc.loadPackageDefinition(packageDefinition).serviceOne
 
 // API Functions
 function printData(call, callback) {
-  console.log("Request from:", call.request.name);
+  console.log("Request Recieved From:", call.request.name);
   callback(null, { message: "I am a response from Server One" } /* DataReply Object */);
 }
 
@@ -28,17 +28,17 @@ function ServiceOneGRPCServer() {
 
   server.addService(service_one_proto.ServiceOne.service, { printData: printData });
 
-  let credentials = grpc.ServerCredentials.createSsl(
-    fs.readFileSync('../certs/ca.crt'), [{
-      cert_chain: fs.readFileSync('../certs/server.crt'),
-      private_key: fs.readFileSync('../certs/server.key')
-    }], true);
+  // let credentials = grpc.ServerCredentials.createSsl(
+  //   fs.readFileSync('../certs/cert.pem'), [{
+  //     cert_chain: fs.readFileSync('../certs/ca.pem'),
+  //     private_key: fs.readFileSync('../certs/key.pem')
+  //   }], false);
 
   let address = process.env.serviceOne + ":" + 8000
   server.bind(
     address,
-    credentials
-    // grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds
+    // credentials
+    grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds
   );
   server.start();
   return server;
@@ -69,7 +69,7 @@ app.listen(8100, function () {
 
   consul.agent.service.register(details, (err, xyz) => {
     if (err) throw err;
-    console.log(details.name, 'registered with Consul');
+    console.log(details.name, 'registered with Consul at', details.address);
   });
 });
 //#endregion

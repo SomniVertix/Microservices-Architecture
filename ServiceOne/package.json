@@ -11,13 +11,13 @@
   "dependencies": {
     "@grpc/proto-loader": "^0.1.0",
     "async": "^1.5.2",
+    "concurrently": "3.5.1",
     "consul": "^0.34.1",
     "express": "^4.16.4",
     "google-protobuf": "^3.0.0",
-    "grpc": "^1.11.0",
+    "grpc": "^1.21.1",
     "minimist": "^1.2.0",
     "mysql": "^2.16.0",
-    "concurrently": "3.5.1",
     "node-vault": "^0.9.5"
   },
   "devDependencies": {},
