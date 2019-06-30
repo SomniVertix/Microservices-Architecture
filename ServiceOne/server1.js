@@ -1,4 +1,5 @@
 const CONSUL_HOST = process.env.consulhost
+const GRPC_PORT = 8000
 
 //#region gRPC Config
 var PROTO_PATH = '../proto/ServiceOne.proto';
@@ -34,7 +35,7 @@ function ServiceOneGRPCServer() {
   //     private_key: fs.readFileSync('../certs/key.pem')
   //   }], false);
 
-  let address = process.env.serviceOne + ":" + 8000
+  let address = process.env.serviceOne + ":" + GRPC_PORT
   server.bind(
     address,
     // credentials
@@ -56,14 +57,13 @@ const consul = require('consul')({
 //#endregion
 
 
-//#region Express Config
-var express = require('express');
-var app = express();
-app.listen(8100, function () {
+function main() {
+  const server = ServiceOneGRPCServer();
+
   let details = {
     name: 'GRPC Server One',
     address: process.env.serviceOne,
-    port: 8000,
+    port: GRPC_PORT,
     id: "S1"
   };
 
@@ -71,11 +71,6 @@ app.listen(8100, function () {
     if (err) throw err;
     console.log(details.name, 'registered with Consul at', details.address);
   });
-});
-//#endregion
-
-function main() {
-  const server = ServiceOneGRPCServer();
 
   console.log('Server 1 Running . . . ');
 }
