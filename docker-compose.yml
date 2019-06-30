@@ -66,25 +66,25 @@ services:
     networks:
     - mynetwork
 
-  ServiceTwo:
-    image: node:alpine
-    volumes:
-      - ./ServiceTwo:/app
-      - ./proto:/proto
-      - ./certs:/certs
-    working_dir: /app
-    depends_on:
-      - db
-    environment:
-      NODE_ENV: development
-      dbhost: db
-      vaulthost: vault
-      consulhost: consul
-      serviceOne: ServiceOne
-      serviceTwo: ServiceTwo
-    command: npm start
-    networks:
-    - mynetwork
+  # ServiceTwo:
+  #   image: node:alpine
+  #   volumes:
+  #     - ./ServiceTwo:/app
+  #     - ./proto:/proto
+  #     - ./certs:/certs
+  #   working_dir: /app
+  #   depends_on:
+  #     - db
+  #   environment:
+  #     NODE_ENV: development
+  #     dbhost: db
+  #     vaulthost: vault
+  #     consulhost: consul
+  #     serviceOne: ServiceOne
+  #     serviceTwo: ServiceTwo
+  #   command: npm start
+  #   networks:
+  #   - mynetwork
 
 
 networks:

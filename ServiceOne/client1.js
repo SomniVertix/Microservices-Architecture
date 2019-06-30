@@ -10,45 +10,47 @@ var grpc = require('grpc');
 var fs = require('fs');
 var protoLoader = require('@grpc/proto-loader');
 var packageDefinition = protoLoader.loadSync(
-    PROTO_PATH,
-    {keepCase: true,
-     longs: String,
-     enums: String,
-     defaults: true,
-     oneofs: true
-    });
+  PROTO_PATH,
+  {
+    keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true
+  });
 var service_one_proto = grpc.loadPackageDefinition(packageDefinition).serviceOne;
 
 var SECOND_PROTO_PATH = '../proto/ServiceTwo.proto';
 var second_packageDefinition = protoLoader.loadSync(
-    SECOND_PROTO_PATH,
-    {keepCase: true,
-     longs: String,
-     enums: String,
-     defaults: true,
-     oneofs: true
-    });
+  SECOND_PROTO_PATH,
+  {
+    keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true
+  });
 var service_two_proto = grpc.loadPackageDefinition(second_packageDefinition).serviceTwo;
 
 
 // Client config options for each server
-function ServiceOneGRPCClient(address, port){
+function ServiceOneGRPCClient(address, port) {
   const credentials = grpc.credentials.createSsl(
-    fs.readFileSync('../certs/ca.crt'), 
-    fs.readFileSync('../certs/client.key'), 
+    fs.readFileSync('../certs/ca.crt'),
+    fs.readFileSync('../certs/client.key'),
     fs.readFileSync('../certs/client.crt')
   );
-  
+
   // Fix for using localhost generated keys in non-localhost applications
   // As seen here -> https://github.com/grpc/grpc/issues/6722
   var options = {
-    'grpc.ssl_target_name_override' : "localhost",
+    'grpc.ssl_target_name_override': "localhost",
     'grpc.default_authority': "localhost"
   };
-  
+
   var fullAddress = address + ":" + port
   var client = new service_one_proto.ServiceOne(
-    fullAddress, 
+    fullAddress,
     credentials,
     options
     //grpc.credentials.createInsecure() // In case you wanted to try it without creds
@@ -56,15 +58,15 @@ function ServiceOneGRPCClient(address, port){
   return client;
 }
 
-function ServiceTwoGRPCClient(address, port){
+function ServiceTwoGRPCClient(address, port) {
   const credentials = grpc.credentials.createSsl(
-    fs.readFileSync('../certs/ca.crt'), 
-    fs.readFileSync('../certs/client.key'), 
+    fs.readFileSync('../certs/ca.crt'),
+    fs.readFileSync('../certs/client.key'),
     fs.readFileSync('../certs/client.crt')
   );
 
   var options = {
-    'grpc.ssl_target_name_override' : "localhost",
+    'grpc.ssl_target_name_override': "localhost",
     'grpc.default_authority': "localhost"
   };
 
@@ -100,9 +102,9 @@ function retrieveVaultToken() {
       endpoint: endpoint,
       token: result.Value
     }
-  
+
     var vault = require("node-vault")(options);
-    vault.read("database/creds/app").then( (res) => {
+    vault.read("database/creds/app").then((res) => {
       // console.log("Database User: " + res.data.username)
       // console.log("Database User: " + res.data.password)
 
@@ -113,21 +115,21 @@ function retrieveVaultToken() {
         password: res.data.password
       });
 
-      con.connect(function(err) {
+      con.connect(function (err) {
         if (err) throw err;
         console.log("Connected!");
       });
     })
-    .catch(console.error);
+      .catch(console.error);
 
 
   })
 }
 
-function waitForServer(serverName){
-  consul.catalog.service.nodes(serverName, function(err, result) {
+function waitForServer(serverName) {
+  consul.catalog.service.nodes(serverName, function (err, result) {
     if (err) throw err;
-    if (result != "undefined"){
+    if (result != "undefined") {
       return false;
     }
   });
@@ -138,34 +140,34 @@ function msleep(n) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, n);
 }
 
-function main() { 
+function main() {
   let serverOneName = 'GRPC Server One'
-  let serverTwoName = 'GRPC Server Two' 
-  let dataRequestObject = {name: 'Service 1 Client'}
+  let serverTwoName = 'GRPC Server Two'
+  let dataRequestObject = { name: 'Service 1 Client' }
 
 
   // Server One Pings
-  if (waitForServer(serverOneName)){
+  if (waitForServer(serverOneName)) {
     msleep(5000);
   }
-  consul.catalog.service.nodes(serverOneName, function(err, result) {
-   if (err) throw err;
-   const serviceOneClient = ServiceOneGRPCClient(result[0].ServiceAddress,result[0].ServicePort );
-   serviceOneClient.printData(dataRequestObject, function(err, response) {
-     console.log("RESPONSE:", response.message);
-   });
+  consul.catalog.service.nodes(serverOneName, function (err, result) {
+    if (err) throw err;
+    const serviceOneClient = ServiceOneGRPCClient(result[0].ServiceAddress, result[0].ServicePort);
+    serviceOneClient.printData(dataRequestObject, function (err, response) {
+      console.log("RESPONSE:", response.message);
+    });
   });
 
 
   // Server Two Pings
-  if (waitForServer(serverTwoName)){
+  if (waitForServer(serverTwoName)) {
     msleep(5000);
   }
-  consul.catalog.service.nodes(serverTwoName, function(err, result) {
+  consul.catalog.service.nodes(serverTwoName, function (err, result) {
     if (err) throw err;
-    console.log(result[0].ServiceAddress,result[0].ServicePort)
-    const serviceTwoClient = ServiceTwoGRPCClient(result[0].ServiceAddress, result[0].ServicePort );
-    serviceTwoClient.GetData(dataRequestObject, function(err, response) {
+    console.log(result[0].ServiceAddress, result[0].ServicePort)
+    const serviceTwoClient = ServiceTwoGRPCClient(result[0].ServiceAddress, result[0].ServicePort);
+    serviceTwoClient.GetData(dataRequestObject, function (err, response) {
       console.log("RESPONSE:", response.message);
     });
   });

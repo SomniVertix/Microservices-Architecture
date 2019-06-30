@@ -6,39 +6,40 @@ var grpc = require('grpc');
 var fs = require('fs');
 var protoLoader = require('@grpc/proto-loader');
 var packageDefinition = protoLoader.loadSync(
-    PROTO_PATH,
-    {keepCase: true,
-     longs: String,
-     enums: String,
-     defaults: true,
-     oneofs: true
-    });
+  PROTO_PATH,
+  {
+    keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true
+  });
 var service_one_proto = grpc.loadPackageDefinition(packageDefinition).serviceOne;
 
 // API Functions
 function printData(call, callback) {
   console.log("Request from:", call.request.name);
-  callback(null, {message: "I am a response from Server One"} /* DataReply Object */);
+  callback(null, { message: "I am a response from Server One" } /* DataReply Object */);
 }
 
 // Server config options
-function ServiceOneGRPCServer (){
+function ServiceOneGRPCServer() {
   var server = new grpc.Server();
 
-  server.addService(service_one_proto.ServiceOne.service, {printData: printData});
+  server.addService(service_one_proto.ServiceOne.service, { printData: printData });
 
   let credentials = grpc.ServerCredentials.createSsl(
     fs.readFileSync('../certs/ca.crt'), [{
-    cert_chain: fs.readFileSync('../certs/server.crt'),
-    private_key: fs.readFileSync('../certs/server.key')
-  }], true);
+      cert_chain: fs.readFileSync('../certs/server.crt'),
+      private_key: fs.readFileSync('../certs/server.key')
+    }], true);
 
   let address = process.env.serviceOne + ":" + 8000
   server.bind(
-    address, 
+    address,
     credentials
     // grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds
-    );
+  );
   server.start();
   return server;
 }
@@ -58,7 +59,7 @@ const consul = require('consul')({
 //#region Express Config
 var express = require('express');
 var app = express();
-app.listen(8100, function (){
+app.listen(8100, function () {
   let details = {
     name: 'GRPC Server One',
     address: process.env.serviceOne,
