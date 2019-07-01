@@ -3,35 +3,11 @@ const VAULT_HOST = process.env.vaulthost
 const DB_HOST = process.env.dbhost
 
 //#region gRPC Config
-
-// Service one and two's proto definitions
-const PROTO_PATH = '../proto/ServiceOne.proto';
 const grpc = require('grpc');
 const fs = require('fs');
-const protoLoader = require('@grpc/proto-loader');
-const packageDefinition = protoLoader.loadSync(
-  PROTO_PATH,
-  {
-    keepCase: true,
-    longs: String,
-    enums: String,
-    defaults: true,
-    oneofs: true
-  });
-const service_one_proto = grpc.loadPackageDefinition(packageDefinition).serviceOne;
-
-const SECOND_PROTO_PATH = '../proto/ServiceTwo.proto';
-const second_packageDefinition = protoLoader.loadSync(
-  SECOND_PROTO_PATH,
-  {
-    keepCase: true,
-    longs: String,
-    enums: String,
-    defaults: true,
-    oneofs: true
-  });
-const service_two_proto = grpc.loadPackageDefinition(second_packageDefinition).serviceTwo;
-
+// Service one and two's proto definitions
+const service_one_proto = require("./grpc/ServiceOneConfig")
+const service_two_proto = require("./grpc/ServiceTwoConfig")
 
 // Client config options for each server
 function ServiceOneGRPCClient(address, port) {

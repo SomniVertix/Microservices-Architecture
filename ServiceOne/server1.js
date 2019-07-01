@@ -2,20 +2,9 @@ const CONSUL_HOST = process.env.consulhost
 const GRPC_PORT = 8000
 
 //#region gRPC Config
-var PROTO_PATH = '../proto/ServiceOne.proto';
-var grpc = require('grpc');
-var fs = require('fs');
-var protoLoader = require('@grpc/proto-loader');
-var packageDefinition = protoLoader.loadSync(
-  PROTO_PATH,
-  {
-    keepCase: true,
-    longs: String,
-    enums: String,
-    defaults: true,
-    oneofs: true
-  });
-var service_one_proto = grpc.loadPackageDefinition(packageDefinition).serviceOne;
+const grpc = require('grpc');
+const fs = require('fs');
+const service_one_proto = require("./grpc/ServiceOneConfig")
 
 // API Functions
 function printData(call, callback) {
@@ -25,7 +14,7 @@ function printData(call, callback) {
 
 // Server config options
 function ServiceOneGRPCServer() {
-  var server = new grpc.Server();
+  const server = new grpc.Server();
 
   server.addService(service_one_proto.ServiceOne.service, { printData: printData });
 
@@ -41,7 +30,6 @@ function ServiceOneGRPCServer() {
     // credentials
     grpc.ServerCredentials.createInsecure() // In case you wanted to try it without creds
   );
-  server.start();
   return server;
 }
 
@@ -59,7 +47,8 @@ const consul = require('consul')({
 
 function main() {
   const server = ServiceOneGRPCServer();
-
+  server.start();
+  
   let details = {
     name: 'GRPC Server One',
     address: process.env.serviceOne,
