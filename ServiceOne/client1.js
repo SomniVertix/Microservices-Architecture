@@ -5,6 +5,7 @@ const DB_HOST = process.env.dbhost
 //#region gRPC Config
 const grpc = require('grpc');
 const fs = require('fs');
+
 // Service one and two's proto definitions
 const service_one_proto = require("./grpc/ServiceOneConfig")
 const service_two_proto = require("./grpc/ServiceTwoConfig")
