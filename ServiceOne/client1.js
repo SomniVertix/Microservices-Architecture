@@ -1,4 +1,3 @@
-const CONSUL_HOST = process.env.consulhost
 const VAULT_HOST = process.env.vaulthost
 const DB_HOST = process.env.dbhost
 
@@ -7,8 +6,8 @@ const grpc = require('grpc');
 const fs = require('fs');
 
 // Service one and two's proto definitions
-const service_one_proto = require("./grpc/ServiceOneConfig")
-const service_two_proto = require("./grpc/ServiceTwoConfig")
+const service_one_proto = require("./shared/grpc/ServiceOneConfig")
+const service_two_proto = require("./shared/grpc/ServiceTwoConfig")
 
 // Client config options for each server
 function ServiceOneGRPCClient(address, port) {
@@ -58,13 +57,8 @@ function ServiceTwoGRPCClient(address, port) {
 }
 //#endregion
 
-//#region Consul Config
-const consul = require('consul')({
-  "host": CONSUL_HOST,
-  "port": 8500, // to be replaced with environment variable telling where consul is
-  "secure": false
-});
-//#endregion
+//Consul Config
+consul = require("./shared/consul/ConsulConfig");
 
 function retrieveVaultToken() {
   // Use consul to retrieve token from vault
@@ -131,7 +125,9 @@ function main() {
   consul.catalog.service.nodes(serverOneName, function (err, result) {
     if (err) throw err;
     const serviceOneClient = ServiceOneGRPCClient(result[0].ServiceAddress, result[0].ServicePort);
+
     console.log("Client 1 pinging", result[0].ServiceAddress, ":", result[0].ServicePort)
+
     serviceOneClient.printData(dataRequestObject, function (err, response) {
       console.log("RESPONSE:", response.message);
     });

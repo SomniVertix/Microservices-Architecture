@@ -1,4 +1,4 @@
-const SECOND_PROTO_PATH = './grpc/ServiceTwo.proto';
+const SECOND_PROTO_PATH = './shared/grpc/ServiceTwo.proto';
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
 const second_packageDefinition = protoLoader.loadSync(

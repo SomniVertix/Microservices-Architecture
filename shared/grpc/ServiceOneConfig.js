@@ -1,4 +1,4 @@
-const PROTO_PATH = './grpc/ServiceOne.proto';
+const PROTO_PATH = './shared/grpc/ServiceOne.proto';
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader');
 const packageDefinition = protoLoader.loadSync(

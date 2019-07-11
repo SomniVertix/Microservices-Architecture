@@ -1,11 +1,10 @@
-const CONSUL_HOST = process.env.consulhost;
 const GRPC_PORT = 8000;
 const SERVICE_HOST = process.env.serviceOne;
 
 //#region gRPC Config
 const grpc = require('grpc');
 const fs = require('fs');
-const service_one_proto = require("./grpc/ServiceOneConfig");
+const service_one_proto = require("./shared/grpc/ServiceOneConfig");
 
 
 // API Functions *soon to be abstracted also*
@@ -22,9 +21,9 @@ const serviceFunctions = {
 // Server config options
 const credentials = grpc.ServerCredentials.createSsl(
   fs.readFileSync('../certs/ca.pem'), [{
-  cert_chain: fs.readFileSync('../certs/cert.pem'),
-  private_key: fs.readFileSync('../certs/key.pem')
-}], true);
+    cert_chain: fs.readFileSync('../certs/cert.pem'),
+    private_key: fs.readFileSync('../certs/key.pem')
+  }], true);
 
 const serverConfig = {
   gRPCService: service_one_proto.ServiceOne.service,
@@ -42,17 +41,12 @@ const details = {
 //#endregion
 
 
-//#region Consul Config
-const consul = require('consul')({
-  "host": CONSUL_HOST,
-  "port": 8500, // whatever port consul is running on
-  "secure": false
-});
-//#endregion
+//Consul Config
+consul = require("./shared/consul/ConsulConfig");
 
 
 function main() {
-  const server = require("./grpc/ServerConfig")(serverConfig);
+  const server = require("./shared/grpc/ServerConfig")(serverConfig);
   server.start();
 
   consul.agent.service.register(details, (err, xyz) => {
