@@ -6,16 +6,15 @@ const grpc = require('grpc');
 const fs = require('fs');
 const service_one_proto = require("./shared/grpc/ServiceOneConfig");
 
+// Pull in all api functions from /api/index.js
+const {
+  PrintData
+} = require("./api")
 
-// API Functions *soon to be abstracted also*
-function printData(call, callback) {
-  console.log("Request Recieved From:", call.request.name);
-  callback(null, { message: "I am a response from Server One" } /* DataReply Object */);
-}
-
-// If more functions needed, just separate with comma! :)
+// Consolidate all function mappings to pass into serverConfig
+// If more functions needed, just separate with comma within the object
 const serviceFunctions = {
-  printData: printData
+  PrintData: PrintData
 }
 
 // Server config options
@@ -42,7 +41,7 @@ const details = {
 
 
 //Consul Config
-consul = require("./shared/consul/ConsulConfig");
+const consul = require("./shared/consul/ConsulConfig");
 
 
 function main() {
